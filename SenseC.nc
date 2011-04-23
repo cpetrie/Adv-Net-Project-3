@@ -300,9 +300,6 @@ implementation
 	}
 
 	event message_t* TargetMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
-		radio_packet_msg_t* message = (radio_packet_msg_t*)payload;
-		radio_packet_msg_t* newMessage;
-
 		if (len != sizeof(TargetMsg)) {
 			return bufPtr;
 		} else {
@@ -319,7 +316,7 @@ implementation
 
 		  // if master transmits a MASTER_POWER_REQUEST
 		  if (MY_MOTE_ID == MASTER_MOTE){
-		    call RssiTimer.startOneShotAt(NODE_DECISION_START_DELAY, 200NODE_DECISION_DELAY);
+		    call RssiTimer.startOneShotAt(NODE_DECISION_START_DELAY, NODE_DECISION_DELAY);
 		  }
 		}
 		// else return
