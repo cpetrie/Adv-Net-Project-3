@@ -8,7 +8,7 @@ typedef nx_struct radio_packet_msg {
 } radio_packet_msg_t;
 
 enum {
-  AM_RADIO_PACKET_MSG = 41,
+  AM_RADIO_PACKET_MSG = 0x41,
 };
 
 enum {
