@@ -40,14 +40,14 @@ implementation
 	}
 
 	event void Timer.fired(){
-		TargetMsg *msg;
+		Message_t *msg;
 		
-		msg = (TargetMsg *)call RadioPacket.getPayload(&packet, sizeof(TargetMsg));
+		msg = (Message_t *)call RadioPacket.getPayload(&packet, sizeof(Message_t));
 		if (msg == NULL) {return;}
 		
 		// send out the local LED state to other motes
 		if (!radioLocked) {
-			if (call RadioAMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(TargetMsg)) == SUCCESS) {
+			if (call RadioAMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(Message_t)) == SUCCESS) {
 				radioLocked = TRUE;
 			}
 		}
