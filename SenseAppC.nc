@@ -43,6 +43,7 @@
  */
 
 #include "printf.h"
+#include "MsgProgram3.h"
 
 configuration SenseAppC 
 { } 
