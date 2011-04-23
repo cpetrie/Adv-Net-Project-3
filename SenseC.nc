@@ -74,6 +74,9 @@ module SenseC
 		interface Boot;
 		interface Leds;
 		interface Receive as RadioReceive;
+		interface Receive as SimpleBeaconMsgReceive;
+		interface Receive as RequestMsgReceive;
+		interface Receive as TargetMsgReceive;
 		interface AMSend as RadioAMSend;
 		interface AMSend as ReportMsgSend;
 		interface SplitControl as RadioAMControl;
@@ -88,7 +91,6 @@ implementation
 {
 	// current packet
 	message_t packet;
-	message_t report_packet;
 
 	// mutex lock for packet operations
 	bool radioLocked = FALSE;
@@ -197,6 +199,17 @@ implementation
 				printf("  value was: %d, setting nearNodeId\n\n", message->data);
 				
 				nearNodeId = message->data;
+				if (nearNodeId == MY_MOTE_ID) {
+					call Leds.led0On();
+					call Leds.led1Off();
+				} else {
+					call Leds.led1On();
+					call Leds.led0Off();
+				}
+
+				call CC2420Config.setChannel (DEFAULT_FREQ_CHANNEL);
+				call RadioAMControl.stop();
+				call RadioAMControl.start();
 			}
 		}
 		
@@ -211,7 +224,7 @@ implementation
 	}
 	
 	event void ReportMsgSend.sendDone (message_t* bufPtr, error_t error) {
-		if (&report_packet == bufPtr) {
+		if (&packet == bufPtr) {
 			radioLocked = FALSE;
 		}
 	}
@@ -239,15 +252,15 @@ implementation
 	}
 
 
-	/* Receive Beacon Message ***************************************************/
-	event message_t* BeaconMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
+	/* Receive Request Message ***************************************************/
+	event message_t* RequestMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
 		BeaconMsg* message = (BeaconMsg*)payload;
 		ReportMsg* newMessage;
 
-		if (len != sizeof(BeaconMsg)) {
+		if (len != sizeof(BeaconMsg) || message->msgtype != REQ) {
 			return bufPtr;
 		} else {
-		
+
 			// make sure the base station is talking to my subnet
 			if (message->subnetid == SUBNET_ID){
 			
@@ -266,16 +279,27 @@ implementation
 								radioLocked = TRUE;
 							}
 						}
-					}
 				}
 			}
+		}
 	}
 
+	/* Receive Simple Beacon Message ***************************************************/
+	event message_t* SimpleBeaconMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
+		BeaconMsg* message = (BeaconMsg*)payload;
+		ReportMsg* newMessage;
+
+		if (len != sizeof(BeaconMsg) || message->msgtype != BCAST) {
+			return bufPtr;
+		} else {
+			call Leds.led2On();
+		}
+	}
 
 	event void CC2420Config.syncDone (error_t err) {
 	}
 
-	event message_t* TargetMsgReceiver.receive(message_t* bufPtr, void* payload, uint8_t len) {
+	event message_t* TargetMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
 		radio_packet_msg_t* message = (radio_packet_msg_t*)payload;
 		radio_packet_msg_t* newMessage;
 
@@ -286,7 +310,7 @@ implementation
 		  
 		  // save rssi
 		  
-		  signalStrength = CC2420Packet.getRssi( bufPtr);
+		  signalStrength = call CC2420Packet.getRssi( bufPtr);
 
 		  // change to personal frequency
 		  call CC2420Config.setChannel (GROUP4_CHANNEL_FREQ);
@@ -301,3 +325,4 @@ implementation
 		// else return
 		return bufPtr;
 	}
+}

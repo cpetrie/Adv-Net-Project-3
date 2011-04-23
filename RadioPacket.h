@@ -33,7 +33,7 @@
 typedef nx_struct radio_packet_msg {
 	nx_uint8_t msg_type;
 	nx_uint8_t node_id;
-	nx_uint16_t data;
+	nx_int16_t data;
 } radio_packet_msg_t;
 
 enum {
