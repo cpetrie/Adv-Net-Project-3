@@ -271,17 +271,18 @@ implementation
 
 	/* Receive Simple Beacon Message ***************************************************/
 	event message_t* SimpleBeaconMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
-		Message_t* message = (Message_t*)payload;
-		
-		beaconperiods = 0;
-
-		if (len != sizeof(Message_t)) {
+		if (len != sizeof (Message_t)) {
 			return bufPtr;
 		} else {
-			connected = TRUE;
-			call Leds.led2On();
+			beaconperiods = 0;
+			
+			if (len != sizeof(Message_t)) {
+				return bufPtr;
+			} else {
+				connected = TRUE;
+				call Leds.led2On();
+			}
 		}
-
 		return bufPtr;
 	}
 
