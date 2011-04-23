@@ -10,24 +10,11 @@
 #define TMSG 0xDD // TargetMsg
 
 // ReportMsg structure
-typedef nx_struct ReportMsg 
+typedef nx_struct Message
 {
-	nx_uint8_t msgtype;
-	nx_uint16_t nodeid; // nodeid contains the subnetid
-} ReportMsg;
-
-// BeaconMsg structure
-typedef nx_struct BeaconMsg 
-{
-	nx_uint8_t msgtype;     //BCAST or REQ
-	nx_uint8_t subnetid;
-} BeaconMsg;
-
-// TargetMsg structure
-typedef nx_struct TargetMsg
-{
-	nx_uint8_t msgtype;
-} TargetMsg;
+  nx_uint8_t subnetid;
+  nx_uint8_t nodeid;
+} Message_t;
 
 // Defining the intervals TargetMsg and BeaconMsg are sent
 enum
