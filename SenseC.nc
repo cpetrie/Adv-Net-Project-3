@@ -56,6 +56,9 @@ enum {
 // the mote number (either 0 or 1)
 #define MY_MOTE_ID SLAVE_MOTE
 
+// our subnet ID
+#define SUBNET_ID 4
+
 // sampling delays in milliseconds
 #define LIGHT_READ_DELAY 200
 
@@ -205,7 +208,7 @@ implementation
 			radioLocked = FALSE;
 		}
 	}
-
+	
 	event void ReportMsgSend.sendDone (message_t* bufPtr, error_t error) {
 		if (&report_packet == bufPtr) {
 			radioLocked = FALSE;
@@ -234,14 +237,42 @@ implementation
 		printfflush();
 	}
 
-	event void CC2420Config.syncDone (error_t err) {
+
+	/* Receive Beacon Message ***************************************************/
+	event message_t* BeaconMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
+		BeaconMsg* message = (BeaconMsg*)payload;
+		ReportMsg* newMessage;
+
+		if (len != sizeof(BeaconMsg)) {
+			return bufPtr;
+		} else {
+		
+			// make sure the base station is talking to my subnet
+			if (message->subnetid == SUBNET_ID){
+			
+				// send back the near node information only if the near node
+				if (nearNodeId == MY_MOTE_ID) {
+				
+					newMessage = (ReportMsg*)call ReportMsgSend.getPayload(&packet, sizeof(ReportMsg));
+					if (newMessage == NULL) {return bufPtr;}	
+	
+						// build message
+						newMessage->msgtype = REP;
+						newMessage->nodeid = nearNodeId;
+				
+						if (!radioLocked) {
+							if (call ReportMsgSend.send(REP, &packet, sizeof(ReportMsg)) == SUCCESS) {
+								radioLocked = TRUE;
+							}
+						}
+					}
+				}
+			}
 	}
 
-}
 
-
-
-
+	event void CC2420Config.syncDone (error_t err) {
+	}
 
 	event message_t* TargetMsgReceiver.receive(message_t* bufPtr, void* payload, uint8_t len) {
 		radio_packet_msg_t* message = (radio_packet_msg_t*)payload;
