@@ -241,7 +241,7 @@ implementation
 		Message_t* message = (Message_t*)payload;
 		Message_t* newMessage;
 
-		if (len != sizeof(BeaconMsg) || message->msgtype != REQ) {
+		if (len != sizeof(Message_t)) {
 			return bufPtr;
 		} else {
 
