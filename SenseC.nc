@@ -84,9 +84,6 @@ implementation
 /* Configure Radio **************************************************************/
 	event void RadioAMControl.startDone(error_t err) {
 		if (err == SUCCESS) {
-			printf ("Started radio on channel %d\n",
-				call CC2420Config.getChannel ());
-			printfflush ();
 		}
 		else {
 			call RadioAMControl.start();
@@ -108,8 +105,6 @@ implementation
 		
 			// if the message is a MASTER_POWER_REQUEST, send a response
 			if (message->msg_type == MASTER_POWER_REQUEST) {
-				printf("Received MASTER_POWER_REQUEST message from %d.\n", (unsigned int) message->node_id);
-				printfflush();		    	
 				
 				newMessage = (radio_packet_msg_t*)call RadioPacket.getPayload(&packet, sizeof(radio_packet_msg_t));
 				if (newMessage == NULL) {return bufPtr;}	
@@ -129,9 +124,6 @@ implementation
 			
 			// if the message is a SLAVE_POWER_RESPONSE, send out the Near-Node-ID
 			else if (message->msg_type == SLAVE_POWER_RESPONSE){
-				printf("\nReceived SLAVE_POWER_RESPONSE message from %d.\n", (unsigned int) message->node_id);
-				printf("  value was: %d, (my value is %d)\n\n", message->data, signalStrength);
-				printfflush();
 		
 				// decide on the Near-Node ID
 				if (message->data > signalStrength){
@@ -144,9 +136,6 @@ implementation
 				//--------------------------------------------
 				newMessage = (radio_packet_msg_t*)call RadioPacket.getPayload(&packet, sizeof(radio_packet_msg_t));
 				if (newMessage == NULL) {return bufPtr;}	
-	
-				printf("Sending out message with Near Node ID: %d\n", nearNodeId);
-				printfflush();
 	
 				// build message
 				newMessage->msg_type = NEAR_ID;
@@ -163,9 +152,6 @@ implementation
 			
 			// if the message is a NEAR_ID, then set this value internally
 			else if (message->msg_type == NEAR_ID){
-				printf("\nReceived NEAR_ID message from %d.\n", (unsigned int) message->node_id);
-				printf("  value was: %d, setting nearNodeId\n\n", message->data);
-				
 				nearNodeId = message->data;
 				if (nearNodeId == MY_MOTE_ID) {
 					call Leds.led0On();
@@ -186,16 +172,11 @@ implementation
 	
 /* Sending via radio *********************************************************/
 	event void RadioAMSend.sendDone(message_t* bufPtr, error_t error) {
-		printf ("RadioAMSend.sendDone\n");
-		printfflush ();
 		if (&packet == bufPtr) {
 			radio_packet_msg_t* message;
 			message = (radio_packet_msg_t*)call RadioPacket.getPayload(&packet, sizeof(radio_packet_msg_t));
 
 			radioLocked = FALSE;
-
-			printf("Mote %d just finished sending out an Rssi request!\n", (int) MY_MOTE_ID);
-			printfflush ();
 
 			if (MY_MOTE_ID == MASTER_MOTE
 			    && message->msg_type == NEAR_ID) {
@@ -236,12 +217,8 @@ implementation
 		if (!radioLocked) {
 			if (call RadioAMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(radio_packet_msg_t)) == SUCCESS) {
 				radioLocked = TRUE;
-				printf("Mote %d just sent out an Rssi request!\n", (int) MY_MOTE_ID);
 			}
 		}
-		
-		printf ("Hopefully, the line above refers to sending an Rssi\n");
-		printfflush();
 	}
 
 /* Subnet timeout: switch back to broadcast frequency **********************/
@@ -261,28 +238,28 @@ implementation
 
 	/* Receive Request Message ***************************************************/
 	event message_t* RequestMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
-		BeaconMsg* message = (BeaconMsg*)payload;
-		ReportMsg* newMessage;
+		Message_t* message = (Message_t*)payload;
+		Message_t* newMessage;
 
 		if (len != sizeof(BeaconMsg) || message->msgtype != REQ) {
 			return bufPtr;
 		} else {
 
 			// make sure the base station is talking to my subnet
-			if (message->subnetid == SUBNET_ID){
+		  if (message->subnetid == SUBNET_ID){
 			
 				// send back the near node information only if the near node
 				if (nearNodeId == MY_MOTE_ID) {
 				
-					newMessage = (ReportMsg*)call ReportMsgPacket.getPayload(&packet, sizeof(ReportMsg));
+					newMessage = (Message_t*)call ReportMsgPacket.getPayload(&packet, sizeof(Message_t));
 					if (newMessage == NULL) {return bufPtr;}	
 	
 					// build message
-					newMessage->msgtype = REP;
 					newMessage->nodeid = nearNodeId;
+					newMessage->subnetid = SUBNET_ID;
 				
 					if (!radioLocked) {
-						if (call ReportMsgSend.send(REP, &packet, sizeof(ReportMsg)) == SUCCESS) {
+						if (call ReportMsgSend.send(REP, &packet, sizeof(Message_t)) == SUCCESS) {
 							radioLocked = TRUE;
 						}
 					}
@@ -294,11 +271,11 @@ implementation
 
 	/* Receive Simple Beacon Message ***************************************************/
 	event message_t* SimpleBeaconMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
-		BeaconMsg* message = (BeaconMsg*)payload;
+		Message_t* message = (Message_t*)payload;
 		
 		beaconperiods = 0;
 
-		if (len != sizeof(BeaconMsg) || message->msgtype != BCAST) {
+		if (len != sizeof(Message_t)) {
 			return bufPtr;
 		} else {
 			connected = TRUE;
@@ -314,18 +291,13 @@ implementation
 	}
 
 	event message_t* TargetMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
-		if (len != sizeof(TargetMsg)) {
+		if (len != sizeof(Message_t)) {
 			return bufPtr;
 		} else {
-		
-		  
+				  
 			// save rssi
 		  
 			signalStrength = call CC2420Packet.getRssi( bufPtr);
-
-			printf ("Mote %d got a target message with strength %d\n",
-				MY_MOTE_ID, signalStrength);
-			printfflush ();
 
 			// change to personal frequency
 			call CC2420Config.setChannel (GROUP4_CHANNEL_FREQ);
