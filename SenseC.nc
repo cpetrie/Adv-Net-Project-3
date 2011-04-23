@@ -92,7 +92,7 @@ implementation
 	bool led0On = FALSE;
 
 	// signal strength
-	unsigned int signalStrength = 0;
+	int8_t signalStrength = 0;
 
 	event void Boot.booted() {
 		call RadioAMControl.start();
@@ -230,3 +230,27 @@ implementation
 	}
 
 }
+
+
+
+
+
+	event message_t* TargetMsgReceiver.receive(message_t* bufPtr, void* payload, uint8_t len) {
+		radio_packet_msg_t* message = (radio_packet_msg_t*)payload;
+		radio_packet_msg_t* newMessage;
+
+		if (len != sizeof(TargetMsg)) {
+			return bufPtr;
+		} else {
+		
+		  
+		  // save rssi
+		  
+		  signalStrength = CC2420Packet.getRssi( bufPtr);
+
+		  // change to personal frequency
+		  // if master transmits some stuff
+
+		  // else hang out		
+		return bufPtr;
+	}
