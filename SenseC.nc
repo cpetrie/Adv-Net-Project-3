@@ -259,7 +259,7 @@ implementation
 					newMessage->subnetid = SUBNET_ID;
 				
 					if (!radioLocked) {
-						if (call ReportMsgSend.send(REP, &packet, sizeof(Message_t)) == SUCCESS) {
+						if (call ReportMsgSend.send(AM_BROADCAST_ADDR, &packet, sizeof(Message_t)) == SUCCESS) {
 							radioLocked = TRUE;
 						}
 					}
