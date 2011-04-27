@@ -43,23 +43,16 @@
  */
 
 #include "printf.h"
+#include "UserButton.h"
 
-configuration SenseAppC 
+configuration RadioAppC 
 { } 
 implementation { 
   
-  components SenseC as App, MainC, LedsC, new HamamatsuS1087ParC() as Sensor;
-  components new TimerMilliC() as SamplingTimer, new TimerMilliC() as BlueLedTimer;
-  components new AMSenderC(AM_RADIO_PACKET_MSG);
-  components new AMReceiverC(AM_RADIO_PACKET_MSG);
-  components ActiveMessageC;
+  components RadioC as App, MainC, LedsC, UserButtonC;
 
   App.Boot -> MainC.Boot;
   App.Leds -> LedsC;
-  App.SamplingTimer -> SamplingTimer;
-  App.Read -> Sensor;
-  App.RadioReceive -> AMReceiverC;
-  App.RadioAMSend -> AMSenderC;
-  App.RadioAMControl -> ActiveMessageC;
-  App.RadioPacket -> AMSenderC;
+  App.ButtonGet -> UserButtonC.Get;
+  App.ButtonNotify -> UserButtonC.Notify;
 }

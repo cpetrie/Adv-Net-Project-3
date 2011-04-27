@@ -38,28 +38,31 @@
  * Sensing demo application. See README.txt file in this directory for usage
  * instructions and have a look at tinyos-2.x/doc/html/tutorial/lesson5.html
  * for a general tutorial on sensing in TinyOS.
- * 
+ *
  * @author Jan Hauer
  */
 
-#include "printf.h"
+#include "UserButton.h"
 
-configuration SenseAppC 
-{ } 
-implementation { 
-  
-  components SenseC as App, MainC, LedsC, new HamamatsuS1087ParC() as Sensor;
-  components new TimerMilliC() as SamplingTimer, new TimerMilliC() as BlueLedTimer;
-  components new AMSenderC(AM_RADIO_PACKET_MSG);
-  components new AMReceiverC(AM_RADIO_PACKET_MSG);
-  components ActiveMessageC;
-
-  App.Boot -> MainC.Boot;
-  App.Leds -> LedsC;
-  App.SamplingTimer -> SamplingTimer;
-  App.Read -> Sensor;
-  App.RadioReceive -> AMReceiverC;
-  App.RadioAMSend -> AMSenderC;
-  App.RadioAMControl -> ActiveMessageC;
-  App.RadioPacket -> AMSenderC;
+module RadioC
+{
+  uses {
+    interface Boot;
+    interface Leds;
+	interface Get<button_state_t> as ButtonGet;
+	interface Notify<button_state_t> as ButtonNotify;
+  }
+}
+implementation
+{
+  event void Boot.booted() {
+  	call ButtonNotify.enable();
+  }
+  event void ButtonNotify.notify (button_state_t val) {
+  	if (val) {
+	  	call Leds.led2On();
+	} else {
+		call Leds.led2Off();
+	}
+  }
 }
