@@ -65,7 +65,7 @@ module RadioC
     interface Timer<TMilli> as Timer;
 
     interface CC2420Config as RadioConfig;
-//	interface Init as RadioConfigInit;
+    interface CC2420Packet;
   }
 }
 implementation
@@ -85,22 +85,6 @@ implementation
     call RadioConfig.setChannel (channel);
   }
   event void ButtonNotify.notify (button_state_t val) {
-		
-  	if (val == BUTTON_RELEASED) {
-  		channel++;
-  		if (channel > 26) {
-  			channel = 11;
-  		}
-  		if (call RadioConfig.getChannel() > 13) {
-  			call Leds.led2On();
-  		} else {
-  			call Leds.led2Off();
-  		}
-  		call RadioConfig.setChannel (channel);
-		printf ("%s changed channel to %d\n", RECEIVER ? "RECEIVER" : "SENDER",
-				call RadioConfig.getChannel());
-		printfflush ();
-  	}
   }
 
   event void RadioAMControl.startDone(error_t err) {
@@ -146,6 +130,8 @@ implementation
 	    else {
 //		    radio_packet_msg_t* msg = (radio_packet_msg_t*)payload;
 			call Leds.led1On();
+			printf ("Signal strength is %d\n", call CC2420Packet.getRssi (bufPtr));
+			printfflush ();
 		}
 	    return bufPtr;
   }  

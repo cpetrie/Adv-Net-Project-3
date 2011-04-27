@@ -56,6 +56,7 @@ implementation {
   components new AMReceiverC(AM_RADIO_PACKET_MSG);
   components ActiveMessageC;
   components CC2420ControlC as RadioConfig;
+  components CC2420PacketC;
   
   App.Boot -> MainC.Boot;
   App.Leds -> LedsC;
@@ -70,5 +71,5 @@ implementation {
   App.RadioPacket -> AMSenderC;
 
   App.RadioConfig -> RadioConfig.CC2420Config;
-//  App.RadioInit -> RadioConfig.Init;
+  App.CC2420Packet -> CC2420PacketC;
 }
