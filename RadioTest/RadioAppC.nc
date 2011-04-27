@@ -44,15 +44,30 @@
 
 #include "printf.h"
 #include "UserButton.h"
+#include "RadioPacket.h"
 
 configuration RadioAppC 
 { } 
-implementation { 
+implementation {
   
   components RadioC as App, MainC, LedsC, UserButtonC;
-
+  components new TimerMilliC() as Timer;
+  components new AMSenderC(AM_RADIO_PACKET_MSG);
+  components new AMReceiverC(AM_RADIO_PACKET_MSG);
+  components ActiveMessageC;
+  components CC2420ControlC as RadioConfig;
+  
   App.Boot -> MainC.Boot;
   App.Leds -> LedsC;
   App.ButtonGet -> UserButtonC.Get;
   App.ButtonNotify -> UserButtonC.Notify;
+
+  App.Timer -> Timer;
+
+  App.RadioReceive -> AMReceiverC;
+  App.RadioAMSend -> AMSenderC;
+  App.RadioAMControl -> ActiveMessageC;
+  App.RadioPacket -> AMSenderC;
+
+  App.RadioConfig -> RadioConfig.CC2420Config;
 }
