@@ -53,7 +53,7 @@ enum {
 };
 
 // the mote number (either 0 or 1)
-#define MY_MOTE_ID SLAVE_MOTE
+#define MY_MOTE_ID MASTER_MOTE
 
 // sampling delays in milliseconds
 #define LIGHT_READ_DELAY 200
@@ -145,7 +145,7 @@ implementation
 			
 			// if the message is a SLAVE_POWER_RESPONSE, do SOMETHING
 			else if (message->msg_type == SLAVE_POWER_RESPONSE){
-				printf("Received SLAVE_POWER_RESPONSE message from %d.\n\n", (unsigned int) message->node_id);
+				printf("\nReceived SLAVE_POWER_RESPONSE message from %d.\n", (unsigned int) message->node_id);
 				printf("  value was: %d, (my value is %d)\n\n", message->data, signalStrength);
 				printfflush();
 			}
