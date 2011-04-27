@@ -63,11 +63,12 @@ implementation {
   App.ButtonNotify -> UserButtonC.Notify;
 
   App.Timer -> Timer;
-
+  
   App.RadioReceive -> AMReceiverC;
   App.RadioAMSend -> AMSenderC;
   App.RadioAMControl -> ActiveMessageC;
   App.RadioPacket -> AMSenderC;
 
   App.RadioConfig -> RadioConfig.CC2420Config;
+//  App.RadioInit -> RadioConfig.Init;
 }

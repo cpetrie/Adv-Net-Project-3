@@ -44,6 +44,7 @@
 
 #include "UserButton.h"
 #include "RadioPacket.h"
+#include "printf.h"
 
 #define RECEIVER 1
 #define SENDER (!RECEIVER)
@@ -64,6 +65,7 @@ module RadioC
     interface Timer<TMilli> as Timer;
 
     interface CC2420Config as RadioConfig;
+//	interface Init as RadioConfigInit;
   }
 }
 implementation
@@ -95,6 +97,9 @@ implementation
   			call Leds.led2Off();
   		}
   		call RadioConfig.setChannel (channel);
+		printf ("%s changed channel to %d\n", RECEIVER ? "RECEIVER" : "SENDER",
+				call RadioConfig.getChannel());
+		printfflush ();
   	}
   }
 
