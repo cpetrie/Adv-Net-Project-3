@@ -45,7 +45,7 @@
 #include "UserButton.h"
 #include "RadioPacket.h"
 
-#define RECEIVER 0
+#define RECEIVER 1
 #define SENDER (!RECEIVER)
 
 #define DELAY() (512 * (1 + RECEIVER))
@@ -88,6 +88,11 @@ implementation
   		channel++;
   		if (channel > 26) {
   			channel = 11;
+  		}
+  		if (call RadioConfig.getChannel() > 13) {
+  			call Leds.led2On();
+  		} else {
+  			call Leds.led2Off();
   		}
   		call RadioConfig.setChannel (channel);
   	}
@@ -141,8 +146,5 @@ implementation
   }  
 
   event void RadioConfig.syncDone (error_t err) {
-  	if (err != SUCCESS) {
-  		call Leds.led2On();
-  	}
   }
 }
