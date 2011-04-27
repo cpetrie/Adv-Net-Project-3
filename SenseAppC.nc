@@ -42,6 +42,8 @@
  * @author Jan Hauer
  */
 
+#include "printf.h"
+
 configuration SenseAppC 
 { } 
 implementation { 
@@ -50,21 +52,14 @@ implementation {
   components new TimerMilliC() as SamplingTimer, new TimerMilliC() as BlueLedTimer;
   components new AMSenderC(AM_RADIO_DATA_MSG);
   components new AMReceiverC(AM_RADIO_DATA_MSG);
-  components SerialActiveMessageC as AM;
   components ActiveMessageC;
 
   App.Boot -> MainC.Boot;
   App.Leds -> LedsC;
   App.SamplingTimer -> SamplingTimer;
-  App.BlueLedTimer -> BlueLedTimer;
   App.Read -> Sensor;
   App.RadioReceive -> AMReceiverC;
   App.RadioAMSend -> AMSenderC;
   App.RadioAMControl -> ActiveMessageC;
   App.RadioPacket -> AMSenderC;
-
-  App.SerialControl -> AM;
-  App.SerialReceive -> AM.Receive[AM_SERIAL_DATA_MSG];
-  App.SerialAMSend -> AM.AMSend[AM_SERIAL_DATA_MSG];
-  App.SerialPacket -> AM;
 }

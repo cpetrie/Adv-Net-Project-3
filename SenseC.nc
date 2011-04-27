@@ -43,27 +43,24 @@
  */
 
 #include "Timer.h"
-#include "RadioDataToLeds.h"
-#include "SerialData.h"
+#include "printf.h"
+#include "RadioPacket.h"
 
 // enumeration of mote IDs
 enum {
-	MOTE0 = 0,
-	MOTE1 = 1,
-	MOTE2 = 2
+	MASTER_MOTE = 0,
+	SLAVE_MOTE = 1,
+	OTHER_MOTE = 2
 };
   
 // the mote number (either 0 or 1)
-#define MY_MOTE_ID MOTE0
+#define MY_MOTE_ID MASTER_MOTE
 
 // sampling delays in binary milliseconds
-#define RED_SAMPLING_DELAY 1000
-#define GREEN_SAMPLING_DELAY 2000
-#define SAMPLING_DELAY() (MY_MOTE_ID == MOTE1 ? GREEN_SAMPLING_DELAY : RED_SAMPLING_DELAY)
-#define BLUE_LED_SAMPLING_DELAY 500
+#define SAMPLING_DELAY 500
   
 // light threshold
-#define LIGHT_THRES 100
+#define LIGHT_THRES 50
   
 
 /** Serial Packet Code ******************************************/
@@ -78,11 +75,11 @@ uint16_t serial_pack(int radioId, bool ledOn){
 	return newPacket;
 }
 
-int serial_getRadioId(uint16_t packet){
+int radio_getId(uint16_t packet){
 	return (packet & ID_MASK);
 }
 
-bool serial_getLedState(uint16_t packet){
+bool radio_getLedState(uint16_t packet){
 	return ((packet >> LED_OFFSET) & LED_MASK)? TRUE : FALSE;
 }
 /*****************************************************************/
@@ -97,13 +94,7 @@ module SenseC
     interface SplitControl as RadioAMControl;
     interface Packet as RadioPacket;
     interface Timer<TMilli> as SamplingTimer;
-    interface Timer<TMilli> as BlueLedTimer;
     interface Read<uint16_t>;
-	
-	interface SplitControl as SerialControl;
-	interface Receive as SerialReceive;
-	interface AMSend as SerialAMSend;
-	interface Packet as SerialPacket;
   }
 }
 implementation
@@ -111,14 +102,11 @@ implementation
   // current packet
   message_t packet;
 
-  // current serial packet
-  message_t serialPacket;
-  
   // mutex lock for packet operations
-  bool locked = FALSE;
-
-  // mutex lock for serial operations
-  bool serialLocked = FALSE;
+  bool radioLocked = FALSE;
+  
+  // signal strength
+  int signalStrength = 0;
   
   // designates if LED should be on or not
   bool led0On = FALSE;
@@ -126,13 +114,11 @@ implementation
   
   event void Boot.booted() {
     call RadioAMControl.start();
-    call SerialControl.start();
   }
   
   event void RadioAMControl.startDone(error_t err) {
     if (err == SUCCESS) {
-		call SamplingTimer.startPeriodic(SAMPLING_DELAY());
-		call BlueLedTimer.startPeriodic(BLUE_LED_SAMPLING_DELAY);
+		call SamplingTimer.startPeriodic(SAMPLING_DELAY);
     }
     else {
       call RadioAMControl.start();
@@ -141,27 +127,6 @@ implementation
 
   event void RadioAMControl.stopDone(error_t err) {
     // do nothing
-  }
-
-  event void SerialControl.startDone(error_t err) {
-    if (err == SUCCESS) {
-		// do nothing
-    }
-    else {
-      call SerialControl.start();
-    }
-  }
-
-  event void SerialControl.stopDone(error_t err) {
-    // do nothing
-  }
-
-  event void BlueLedTimer.fired(){
-  	if (led0On && led1On) {
-  		call Leds.led2On();
-  	} else {
-  		call Leds.led2Off();
-  	}
   }
 
   event void SamplingTimer.fired(){
@@ -173,25 +138,24 @@ implementation
     if (rcm == NULL) {return;}
 
 	// send different data based on which mote is configured
-	if (MY_MOTE_ID == MOTE0){
+	if (MY_MOTE_ID == MASTER_MOTE){
    		rcm->data = serial_pack(MY_MOTE_ID, led0On);
-   	} else if (MY_MOTE_ID == MOTE1){
+   	} else if (MY_MOTE_ID == SLAVE_MOTE){
    		rcm->data = serial_pack(MY_MOTE_ID, led1On);
    	} else {
    		rcm->data = serial_pack(MY_MOTE_ID, FALSE);
    	}
     
 	// send out the local LED state to other motes
-    if (!locked) {
+    if (!radioLocked) {
       if (call RadioAMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(radio_data_msg_t)) == SUCCESS) {
-			locked = TRUE;
+			radioLocked = TRUE;
       }
     }
   }
 
 
   event void Read.readDone(error_t result, uint16_t data) {
-	serial_data_msg_t* scm;
 	bool bright = data > LIGHT_THRES;
 	bool change = FALSE;
 	
@@ -200,22 +164,22 @@ implementation
 		// store the local LED state
     	if (bright){
     		switch(MY_MOTE_ID){
-    			case MOTE0:
+    			case MASTER_MOTE:
     				change = led0On ^ (bright);
     				led0On = TRUE;
     			break;
-    			case MOTE1:
+    			case SLAVE_MOTE:
     				change = led1On ^ (bright);
        				led1On = TRUE;
     			break;
     		}
     	} else {
 			switch(MY_MOTE_ID){
-    			case MOTE0:
+    			case MASTER_MOTE:
     				change = led0On ^ (bright);
     				led0On = FALSE;
     			break;
-    			case MOTE1:
+    			case SLAVE_MOTE:
     				change = led1On ^ (bright);
     				led1On = FALSE;
     			break;
@@ -237,16 +201,8 @@ implementation
     	} 	
 
 		if (change) {
-		    scm = (serial_data_msg_t*)call RadioPacket.getPayload(&serialPacket, sizeof(serial_data_msg_t));
-    		if (scm == NULL) {return;}
-
-			scm->id = MY_MOTE_ID;
-			scm->state = bright;
-    		if (!serialLocked) {
-      			if (call SerialAMSend.send(AM_BROADCAST_ADDR, &serialPacket, sizeof(serial_data_msg_t)) == SUCCESS) {
-					serialLocked = TRUE;
-      			}
-    		}
+			printf("A State Change has occurred! sensor value: %d\n", data);
+			printfflush();
     	}
   	}
   }
@@ -258,31 +214,22 @@ implementation
 	    else {
 		    radio_data_msg_t* rcm = (radio_data_msg_t*)payload;
 		    bool change = FALSE;
-		    serial_data_msg_t* scm;
 		    
 		    // if data from mote 0
-		    if (serial_getRadioId(rcm->data) == MOTE0){
-		    	change = (led0On != serial_getLedState (rcm->data));	    		
-				led0On = serial_getLedState (rcm->data);
+		    if (radio_getId(rcm->data) == MASTER_MOTE){
+		    	change = (led0On != radio_getLedState (rcm->data));	    		
+				led0On = radio_getLedState (rcm->data);
 		    } 
 		    
 		    // if data from mote 1
-		    else if (serial_getRadioId(rcm->data) == MOTE1){
-		    	change = (led1On != serial_getLedState (rcm->data));
-				led1On = serial_getLedState (rcm->data);
+		    else if (radio_getId(rcm->data) == SLAVE_MOTE){
+		    	change = (led1On != radio_getLedState (rcm->data));
+				led1On = radio_getLedState (rcm->data);
 		    }
 
 			if (change) {
-		    	scm = (serial_data_msg_t*)call RadioPacket.getPayload(&serialPacket, sizeof(serial_data_msg_t));
-    			if (scm == NULL) {return bufPtr;}
-
-				scm->id = serial_getRadioId (rcm->data);
-				scm->state = serial_getLedState (rcm->data);
-   				if (!serialLocked) {
-   					if (call SerialAMSend.send(AM_BROADCAST_ADDR, &serialPacket, sizeof(serial_data_msg_t)) == SUCCESS) {
-						serialLocked = TRUE;
-   					}
-   				}
+				printf("Remote Sensor state changed\n");
+				printfflush();		    	
   			}
 		}
 	    return bufPtr;
@@ -290,17 +237,8 @@ implementation
   
     event void RadioAMSend.sendDone(message_t* bufPtr, error_t error) {
 	    if (&packet == bufPtr) {
-	      locked = FALSE;
+	      radioLocked = FALSE;
 	    }
   	}
 
-	event message_t* SerialReceive.receive (message_t *bufPtr, void* payload, uint8_t len) {
-		return bufPtr;
-	}
-	
-	event void SerialAMSend.sendDone (message_t* bufPtr, error_t error) {
-		if (&serialPacket == bufPtr) {
-			serialLocked = FALSE;
-		}
-	}
 }
