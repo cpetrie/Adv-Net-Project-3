@@ -53,7 +53,7 @@ enum {
 };
 
 // the mote number (either 0 or 1)
-#define MY_MOTE_ID MASTER_MOTE
+#define MY_MOTE_ID SLAVE_MOTE
 
 // sampling delays in milliseconds
 #define LIGHT_READ_DELAY 200
@@ -86,6 +86,9 @@ implementation
 
 	// mutex lock for packet operations
 	bool radioLocked = FALSE;
+	
+	// if the led should be on (on for the nearest node)
+	bool led0On = FALSE;
 
 	// signal strength
 	unsigned int signalStrength = 0;
@@ -93,6 +96,8 @@ implementation
 	event void Boot.booted() {
 		call RadioAMControl.start();
 	}
+	
+	int nearNodeId = MASTER_MOTE;
 
 /* Configure Radio **************************************************************/
 	event void RadioAMControl.startDone(error_t err) {
@@ -143,11 +148,46 @@ implementation
 				}	
 			} 
 			
-			// if the message is a SLAVE_POWER_RESPONSE, do SOMETHING
+			// if the message is a SLAVE_POWER_RESPONSE, send out the Near-Node-ID
 			else if (message->msg_type == SLAVE_POWER_RESPONSE){
 				printf("\nReceived SLAVE_POWER_RESPONSE message from %d.\n", (unsigned int) message->node_id);
 				printf("  value was: %d, (my value is %d)\n\n", message->data, signalStrength);
 				printfflush();
+		
+				// decide on the Near-Node ID
+				if (message->data > signalStrength){
+					nearNodeId = message->node_id;
+				} else {
+					nearNodeId = MY_MOTE_ID;
+				}
+				
+				// broadcast the Near-Node ID to other nodes
+				//--------------------------------------------
+				newMessage = (radio_packet_msg_t*)call RadioPacket.getPayload(&packet, sizeof(radio_packet_msg_t));
+				if (newMessage == NULL) {return bufPtr;}	
+	
+				printf("Sending out message with Near Node ID: %d\n", nearNodeId);
+				printfflush();
+	
+				// build message
+				newMessage->msg_type = NEAR_ID;
+				newMessage->node_id = MY_MOTE_ID;
+				newMessage->data = nearNodeId;
+			
+				// send out a mote value request message
+				if (!radioLocked) {
+					if (call RadioAMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(radio_packet_msg_t)) == SUCCESS) {
+						radioLocked = TRUE;
+					}
+				}	
+			}
+			
+			// if the message is a NEAR_ID, then set this value internally
+			else if (message->msg_type == NEAR_ID){
+				printf("\nReceived NEAR_ID message from %d.\n", (unsigned int) message->node_id);
+				printf("  value was: %d, setting nearNodeId\n\n", message->data);
+				
+				nearNodeId = message->data;
 			}
 		}
 		
@@ -164,6 +204,13 @@ implementation
 /* Reading from the light sensor **********************************************/
 	event void LightSampleTimer.fired(){
 		call Read.read();
+		
+		// also... set the led
+		if (nearNodeId == MY_MOTE_ID){
+			if (!led0On){call Leds.led0On(); led0On = TRUE;}
+		} else {
+			if (led0On){call Leds.led0Off(); led0On = FALSE;}
+		}
 	}
 
 	event void Read.readDone(error_t result, uint16_t data) {
