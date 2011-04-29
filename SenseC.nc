@@ -74,6 +74,8 @@ module SenseC
 		interface Boot;
 		interface Leds;
 		interface Receive as RadioReceive;
+		interface Receive as BeaconMsgReceive;
+		interface Receive as TargetMsgReceive;
 		interface AMSend as RadioAMSend;
 		interface AMSend as ReportMsgSend;
 		interface SplitControl as RadioAMControl;
@@ -273,7 +275,7 @@ implementation
 	event void CC2420Config.syncDone (error_t err) {
 	}
 
-	event message_t* TargetMsgReceiver.receive(message_t* bufPtr, void* payload, uint8_t len) {
+	event message_t* TargetMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
 		radio_packet_msg_t* message = (radio_packet_msg_t*)payload;
 		radio_packet_msg_t* newMessage;
 
@@ -296,3 +298,4 @@ implementation
 		  // else hang out		
 		return bufPtr;
 	}
+}
