@@ -188,6 +188,8 @@ implementation
 	
 /* Sending via radio *********************************************************/
 	event void RadioAMSend.sendDone(message_t* bufPtr, error_t error) {
+		printf ("RadioAMSend.sendDone\n");
+		printfflush ();
 		if (&packet == bufPtr) {
 			radio_packet_msg_t* message;
 			message = (radio_packet_msg_t*)call RadioPacket.getPayload(&packet, sizeof(radio_packet_msg_t));
@@ -195,6 +197,7 @@ implementation
 			radioLocked = FALSE;
 
 			printf("Mote %d just finished sending out an Rssi request!\n", (int) MY_MOTE_ID);
+			printfflush ();
 
 			if (MY_MOTE_ID == MASTER_MOTE
 			    && message->msg_type == NEAR_ID) {
