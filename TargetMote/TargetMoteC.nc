@@ -20,7 +20,6 @@ implementation
 	bool radioLocked;
   
 	event void Boot.booted() {
-		call ButtonNotify.enable();
 		call Leds.led0On();
 		call RadioAMControl.start();
 		radioLocked = FALSE;
@@ -40,17 +39,15 @@ implementation
 	}
 
 	event void Timer.fired(){
-		if (SENDER) {
-			TargetMsg *msg;
-    
-			msg = (TargetMsg *)call RadioPacket.getPayload(&packet, sizeof(TargetMsg));
-			if (msg == NULL) {return;}
-    
-			// send out the local LED state to other motes
-			if (!radioLocked) {
-				if (call RadioAMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(TargetMsg)) == SUCCESS) {
-					radioLocked = TRUE;
-				}
+		TargetMsg *msg;
+		
+		msg = (TargetMsg *)call RadioPacket.getPayload(&packet, sizeof(TargetMsg));
+		if (msg == NULL) {return;}
+		
+		// send out the local LED state to other motes
+		if (!radioLocked) {
+			if (call RadioAMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(TargetMsg)) == SUCCESS) {
+				radioLocked = TRUE;
 			}
 		}
 	}
