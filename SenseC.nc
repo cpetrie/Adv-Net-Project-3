@@ -246,4 +246,8 @@ implementation
 		printf("Mote %d just sent out an Rssi request!\n", (int) MY_MOTE_ID);
 		printfflush();
 	}
+
+	event void RadioConfig.syncDone (error_t err) {
+	}
+
 }

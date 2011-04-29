@@ -53,89 +53,89 @@
 
 module RadioC
 {
-  uses {
-    interface Boot;
-    interface Leds;
-	interface Get<button_state_t> as ButtonGet;
-	interface Notify<button_state_t> as ButtonNotify;
-    interface Receive as RadioReceive;
-    interface AMSend as RadioAMSend;
-    interface SplitControl as RadioAMControl;
-    interface Packet as RadioPacket;
-    interface Timer<TMilli> as Timer;
+	uses {
+		interface Boot;
+		interface Leds;
+		interface Get<button_state_t> as ButtonGet;
+		interface Notify<button_state_t> as ButtonNotify;
+		interface Receive as RadioReceive;
+		interface AMSend as RadioAMSend;
+		interface SplitControl as RadioAMControl;
+		interface Packet as RadioPacket;
+		interface Timer<TMilli> as Timer;
 
-    interface CC2420Config as RadioConfig;
-    interface CC2420Packet;
-  }
+		interface CC2420Config as RadioConfig;
+		interface CC2420Packet;
+	}
 }
 implementation
 {
-  message_t packet;
-  bool radioLocked;
-  uint8_t channel;
+	message_t packet;
+	bool radioLocked;
+	uint8_t channel;
   
-  event void Boot.booted() {
-  	call ButtonNotify.enable();
-	if (SENDER) {
-	  	call Leds.led0On();
+	event void Boot.booted() {
+		call ButtonNotify.enable();
+		if (SENDER) {
+			call Leds.led0On();
+		}
+		call RadioAMControl.start();
+		radioLocked = FALSE;
+		channel = 11;
+		call RadioConfig.setChannel (channel);
 	}
-  	call RadioAMControl.start();
-  	radioLocked = FALSE;
-	channel = 11;
-    call RadioConfig.setChannel (channel);
-  }
-  event void ButtonNotify.notify (button_state_t val) {
-  }
+	event void ButtonNotify.notify (button_state_t val) {
+	}
 
-  event void RadioAMControl.startDone(error_t err) {
-    if (err == SUCCESS) {
-		call Timer.startPeriodic(DELAY());
-    }
-    else {
-      call RadioAMControl.start();
-    }
-  }
+	event void RadioAMControl.startDone(error_t err) {
+		if (err == SUCCESS) {
+			call Timer.startPeriodic(DELAY());
+		}
+		else {
+			call RadioAMControl.start();
+		}
+	}
 
-  event void RadioAMControl.stopDone(error_t err) {
-    // do nothing
-  }
+	event void RadioAMControl.stopDone(error_t err) {
+		// do nothing
+	}
 
-  event void Timer.fired(){
-	if (SENDER) {
-		radio_packet_msg_t* msg;
+	event void Timer.fired(){
+		if (SENDER) {
+			radio_packet_msg_t* msg;
     
-    	msg = (radio_packet_msg_t*)call RadioPacket.getPayload(&packet, sizeof(radio_packet_msg_t));
-    	if (msg == NULL) {return;}
+			msg = (radio_packet_msg_t*)call RadioPacket.getPayload(&packet, sizeof(radio_packet_msg_t));
+			if (msg == NULL) {return;}
     
-		// send out the local LED state to other motes
-    	if (!radioLocked) {
-      		if (call RadioAMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(radio_packet_msg_t)) == SUCCESS) {
-				radioLocked = TRUE;
-      		}
-    	}
-  	} else if (RECEIVER) {
-  		call Leds.led1Off();
-  	}
-  }
+			// send out the local LED state to other motes
+			if (!radioLocked) {
+				if (call RadioAMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(radio_packet_msg_t)) == SUCCESS) {
+					radioLocked = TRUE;
+				}
+			}
+		} else if (RECEIVER) {
+			call Leds.led1Off();
+		}
+	}
 
-  event void RadioAMSend.sendDone(message_t* bufPtr, error_t error) {
-   if (&packet == bufPtr) {
-     radioLocked = FALSE;
-   }
-  }
+	event void RadioAMSend.sendDone(message_t* bufPtr, error_t error) {
+		if (&packet == bufPtr) {
+			radioLocked = FALSE;
+		}
+	}
 
-  event message_t* RadioReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
+	event message_t* RadioReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
 
-	    if (len != sizeof(radio_packet_msg_t)) {return bufPtr;}
-	    else {
+		if (len != sizeof(radio_packet_msg_t)) {return bufPtr;}
+		else {
 //		    radio_packet_msg_t* msg = (radio_packet_msg_t*)payload;
 			call Leds.led1On();
 			printf ("Signal strength is %d\n", call CC2420Packet.getRssi (bufPtr));
 			printfflush ();
 		}
-	    return bufPtr;
-  }  
+		return bufPtr;
+	}  
 
-  event void RadioConfig.syncDone (error_t err) {
-  }
+	event void RadioConfig.syncDone (error_t err) {
+	}
 }

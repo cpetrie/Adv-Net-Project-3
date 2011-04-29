@@ -67,5 +67,5 @@ implementation {
 	App.RadioPacket -> AMSenderC;
 
 	App.CC2420Packet -> CC2420PacketC;
-	App.CC2420Config -> CC2420CotrolC.CC2420Config;
+	App.CC2420Config -> CC2420ControlC.CC2420Config;
 }
