@@ -272,6 +272,17 @@ implementation
 		}
 	}
 
+	/* Receive Simple Beacon Message ***************************************************/
+	event message_t* SimpleBeaconMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
+		BeaconMsg* message = (BeaconMsg*)payload;
+		ReportMsg* newMessage;
+
+		if (len != sizeof(BeaconMsg) || message->msgtype != BCAST) {
+			return bufPtr;
+		} else {
+			call Leds.led2On();
+		}
+	}
 
 	event void CC2420Config.syncDone (error_t err) {
 	}
@@ -287,7 +298,7 @@ implementation
 		  
 		  // save rssi
 		  
-		  signalStrength = CC2420Packet.getRssi( bufPtr);
+		  signalStrength = call CC2420Packet.getRssi( bufPtr);
 
 		  // change to personal frequency
 		  call CC2420Config.setChannel (GROUP4_CHANNEL_FREQ);
