@@ -244,7 +244,7 @@ implementation
 		beaconperiods++;
 		if (beaconperiods >= BEACONTIMEOUT) {
 			connected = FALSE;
-			Leds.led2Off();
+			call Leds.led2Off();
 		}
 	}
 
