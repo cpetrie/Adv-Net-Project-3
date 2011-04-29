@@ -198,6 +198,13 @@ implementation
 				printf("  value was: %d, setting nearNodeId\n\n", message->data);
 				
 				nearNodeId = message->data;
+				if (nearNodeId == MY_MOTE_ID) {
+					call Leds.led0On();
+					call Leds.led1Off();
+				} else {
+					call Leds.led1On();
+					call Leds.led0Off();
+				}
 			}
 		}
 		
