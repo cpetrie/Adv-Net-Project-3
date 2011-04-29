@@ -45,6 +45,7 @@
 #include "Timer.h"
 #include "printf.h"
 #include "RadioPacket.h"
+#include "MsgProgram3.h"
 
 // enumeration of mote IDs
 enum {
