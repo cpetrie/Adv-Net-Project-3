@@ -36,9 +36,10 @@ module SenseC
 		interface Receive as RequestMsgReceive;
 		interface Receive as TargetMsgReceive;
 		interface AMSend as RadioAMSend;
-		interface AMSend as ReportMsgSend;
-		interface SplitControl as RadioAMControl;
 		interface Packet as RadioPacket;
+		interface AMSend as ReportMsgSend;
+		interface Packet as ReportMsgPacket;
+		interface SplitControl as RadioAMControl;
 		interface Timer<TMilli> as RssiTimer;
 		interface Timer<TMilli> as BaseStationTimer;
 
@@ -264,7 +265,7 @@ implementation
 				// send back the near node information only if the near node
 				if (nearNodeId == MY_MOTE_ID) {
 				
-					newMessage = (ReportMsg*)call ReportMsgSend.getPayload(&packet, sizeof(ReportMsg));
+					newMessage = (ReportMsg*)call ReportMsgPacket.getPayload(&packet, sizeof(ReportMsg));
 					if (newMessage == NULL) {return bufPtr;}	
 	
 						// build message

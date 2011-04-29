@@ -28,6 +28,8 @@ implementation {
 	App.RadioPacket -> RadioPacketSender;
 
 	App.ReportMsgSend -> ReportMsgSender;
+	App.ReportMsgPacket -> ReportMsgSender;
+
 	App.SimpleBeaconMsgReceive -> SimpleBeaconMsgReceiver;
 	App.RequestMsgReceive -> RequestMsgReceiver;
 	App.TargetMsgReceive -> TargetMsgReceiver;

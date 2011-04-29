@@ -17,6 +17,7 @@ implementation {
 	App.Timer -> Timer;
   
 	App.RadioAMSend -> AMSenderC;
+	App.RadioPacket -> AMSenderC;
 	App.RadioAMControl -> ActiveMessageC;
 
 	App.RadioConfig -> RadioConfig.CC2420Config;
