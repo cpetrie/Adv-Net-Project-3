@@ -176,8 +176,6 @@ implementation
 				}
 
 				call CC2420Config.setChannel (DEFAULT_FREQ_CHANNEL);
-				call RadioAMControl.stop();
-				call RadioAMControl.start();
 
 				call SubnetTimeoutTimer.stop ();
 			}
@@ -211,8 +209,6 @@ implementation
 				}
 
 				call CC2420Config.setChannel (DEFAULT_FREQ_CHANNEL);
-				call RadioAMControl.stop();
-				call RadioAMControl.start();
 
 				call SubnetTimeoutTimer.stop ();
 			}
@@ -250,8 +246,6 @@ implementation
 /* Subnet timeout: switch back to broadcast frequency **********************/
 	event void SubnetTimeoutTimer.fired () {
 		call CC2420Config.setChannel (DEFAULT_FREQ_CHANNEL);
-		call RadioAMControl.stop();
-		call RadioAMControl.start();
 	}
 
 /* Count beacon periods ***************************************/
@@ -314,6 +308,8 @@ implementation
 	}
 
 	event void CC2420Config.syncDone (error_t err) {
+		call RadioAMControl.stop();
+		call RadioAMControl.start();
 	}
 
 	event message_t* TargetMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
@@ -332,12 +328,10 @@ implementation
 
 			// change to personal frequency
 			call CC2420Config.setChannel (GROUP4_CHANNEL_FREQ);
-			call RadioAMControl.stop();
-			call RadioAMControl.start();
 
 			// if master transmits a MASTER_POWER_REQUEST
 			if (MY_MOTE_ID == MASTER_MOTE){
-				call RssiTimer.startOneShotAt(NODE_DECISION_START_DELAY, NODE_DECISION_DELAY);
+				call RssiTimer.startOneShotAt(NODE_DECISION_DELAY, NODE_DECISION_START_DELAY);
 			}
 
 			// Start timeout to switch back to broadcast channel if
