@@ -85,6 +85,7 @@ implementation
 {
 	// current packet
 	message_t packet;
+	message_t report_packet;
 
 	// mutex lock for packet operations
 	bool radioLocked = FALSE;
