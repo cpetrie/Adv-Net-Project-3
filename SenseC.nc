@@ -92,6 +92,7 @@ implementation
 
 			printf ("Started radio on channel %d\n",
 				call CC2420Config.getChannel ());
+			printfflush ();
 		}
 		else {
 			call RadioAMControl.start();
