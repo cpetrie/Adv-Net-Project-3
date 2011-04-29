@@ -74,7 +74,8 @@ module SenseC
 		interface Boot;
 		interface Leds;
 		interface Receive as RadioReceive;
-		interface Receive as BeaconMsgReceive;
+		interface Receive as SimpleBeaconMsgReceive;
+		interface Receive as RequestMsgReceive;
 		interface Receive as TargetMsgReceive;
 		interface AMSend as RadioAMSend;
 		interface AMSend as ReportMsgSend;
@@ -239,15 +240,15 @@ implementation
 	}
 
 
-	/* Receive Beacon Message ***************************************************/
-	event message_t* BeaconMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
+	/* Receive Request Message ***************************************************/
+	event message_t* RequestMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
 		BeaconMsg* message = (BeaconMsg*)payload;
 		ReportMsg* newMessage;
 
-		if (len != sizeof(BeaconMsg)) {
+		if (len != sizeof(BeaconMsg) || message->msgtype != REQ) {
 			return bufPtr;
 		} else {
-		
+
 			// make sure the base station is talking to my subnet
 			if (message->subnetid == SUBNET_ID){
 			
@@ -266,9 +267,9 @@ implementation
 								radioLocked = TRUE;
 							}
 						}
-					}
 				}
 			}
+		}
 	}
 
 
