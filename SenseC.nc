@@ -22,6 +22,8 @@ enum {
 #define NODE_DECISION_DELAY 100
 #define NODE_DECISION_START_DELAY 0
 
+#define BEACONTIMEOUT 5
+
 #define DEFAULT_FREQ_CHANNEL 26
 #define GROUP4_CHANNEL_FREQ 14
 module SenseC
@@ -186,7 +188,26 @@ implementation
 /* Sending via radio *********************************************************/
 	event void RadioAMSend.sendDone(message_t* bufPtr, error_t error) {
 		if (&packet == bufPtr) {
+			radio_packet_msg_t* message;
+			message = (radio_packet_msg_t*)call RadioPacket.getPayload(&packet, sizeof(radio_packet_msg_t));
+
 			radioLocked = FALSE;
+
+			if (MY_MOTE_ID == MASTER_MOTE
+			    && message->msg_type == NEAR_ID) {
+
+				if (nearNodeId == MY_MOTE_ID) {
+					call Leds.led0On();
+					call Leds.led1Off();
+				} else {
+					call Leds.led1On();
+					call Leds.led0Off();
+				}
+
+				call CC2420Config.setChannel (DEFAULT_FREQ_CHANNEL);
+				call RadioAMControl.stop();
+				call RadioAMControl.start();
+			}
 		}
 	}
 	
@@ -221,6 +242,10 @@ implementation
 /* Count beacon periods ***************************************/
 	event void BaseStationTimer.fired(){
 		beaconperiods++;
+		if (beaconperiods >= BEACONTIMEOUT) {
+			connected = FALSE;
+			Leds.led2Off();
+		}
 	}
 
 
