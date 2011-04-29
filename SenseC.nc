@@ -64,14 +64,6 @@ enum {
 
 #define DEFAULT_FREQ_CHANNEL 26
 
-void
-change_channel (uint8_t channel)
-{
-	call CC2420Config.setChannel (channel);
-	call RadioAMControl.stop();
-	call RadioAMControl.start();
-}
-
 module SenseC
 {
 	uses {
@@ -100,6 +92,12 @@ implementation
 
 	// signal strength
 	unsigned int signalStrength = 0;
+
+	command void change_channel (uint8_t channel) {
+		call CC2420Config.setChannel (channel);
+		call RadioAMControl.stop();
+		call RadioAMControl.start();
+	}
 	
 	event void Boot.booted() {
 		call RadioAMControl.start();
@@ -114,7 +112,7 @@ implementation
 			if (MY_MOTE_ID == MASTER_MOTE){
 				call RssiTimer.startPeriodicAt(NODE_DECISION_START_DELAY, NODE_DECISION_DELAY);
 			}
-			change_channel (DEFAULT_FREQ_CHANNEL);
+			call change_channel (DEFAULT_FREQ_CHANNEL);
 		}
 		else {
 			call RadioAMControl.start();
