@@ -93,12 +93,6 @@ implementation
 	// signal strength
 	unsigned int signalStrength = 0;
 
-	command void SenseC.change_channel (uint8_t channel) {
-		call CC2420Config.setChannel (channel);
-		call RadioAMControl.stop();
-		call RadioAMControl.start();
-	}
-	
 	event void Boot.booted() {
 		call RadioAMControl.start();
 	}
