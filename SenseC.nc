@@ -22,6 +22,8 @@ enum {
 #define NODE_DECISION_DELAY 100
 #define NODE_DECISION_START_DELAY 0
 
+#define SUBNET_TIMEOUT 2048
+
 #define BEACONTIMEOUT 5
 
 #define DEFAULT_FREQ_CHANNEL 26
@@ -41,6 +43,7 @@ module SenseC
 		interface Packet as ReportMsgPacket;
 		interface SplitControl as RadioAMControl;
 		interface Timer<TMilli> as RssiTimer;
+		interface Timer<TMilli> as SubnetTimeoutTimer;
 		interface Timer<TMilli> as BaseStationTimer;
 
 		interface CC2420Config;
@@ -175,6 +178,8 @@ implementation
 				call CC2420Config.setChannel (DEFAULT_FREQ_CHANNEL);
 				call RadioAMControl.stop();
 				call RadioAMControl.start();
+
+				call SubnetTimeoutTimer.stop ();
 			}
 		}
 		
@@ -203,6 +208,8 @@ implementation
 				call CC2420Config.setChannel (DEFAULT_FREQ_CHANNEL);
 				call RadioAMControl.stop();
 				call RadioAMControl.start();
+
+				call SubnetTimeoutTimer.stop ();
 			}
 		}
 	}
@@ -233,6 +240,13 @@ implementation
 		
 		printf("Mote %d just sent out an Rssi request!\n", (int) MY_MOTE_ID);
 		printfflush();
+	}
+
+/* Subnet timeout: switch back to broadcast frequency **********************/
+	event void SubnetTimeoutTimer.fired () {
+		call CC2420Config.setChannel (DEFAULT_FREQ_CHANNEL);
+		call RadioAMControl.stop();
+		call RadioAMControl.start();
 	}
 
 /* Count beacon periods ***************************************/
@@ -320,6 +334,10 @@ implementation
 		  if (MY_MOTE_ID == MASTER_MOTE){
 		    call RssiTimer.startOneShotAt(NODE_DECISION_START_DELAY, NODE_DECISION_DELAY);
 		  }
+
+		  // Start timeout to switch back to broadcast channel if
+		  // subnet takes too long
+		  call SubnetTimeoutTimer.startOneShotAt (0, SUBNET_TIMEOUT);
 		}
 		// else return
 		return bufPtr;

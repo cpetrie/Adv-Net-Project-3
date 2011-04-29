@@ -7,6 +7,7 @@ implementation {
   
 	components SenseC as App, MainC, LedsC;
 	components new TimerMilliC() as RssiTimer;
+	components new TimerMilliC() as SubnetTimeoutTimer;
 	components new TimerMilliC() as BaseStationTimer;
 	components new AMSenderC(AM_RADIO_PACKET_MSG) as RadioPacketSender;
 	components new AMReceiverC(AM_RADIO_PACKET_MSG) as RadioPacketReceiver;
@@ -21,6 +22,7 @@ implementation {
 	App.Boot -> MainC.Boot;
 	App.Leds -> LedsC;
 	App.RssiTimer -> RssiTimer;
+	App.SubnetTimeoutTimer -> SubnetTimeoutTimer;
 	App.BaseStationTimer -> BaseStationTimer;
 
 	App.RadioReceive -> RadioPacketReceiver;
