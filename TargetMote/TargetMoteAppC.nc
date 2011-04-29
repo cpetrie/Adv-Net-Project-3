@@ -5,7 +5,7 @@ configuration TargetMoteAppC
 { } 
 implementation {
   
-	components RadioC as App, MainC, LedsC;
+	components TargetMoteC as App, MainC, LedsC;
 	components new TimerMilliC() as Timer;
 	components new AMSenderC(TMSG);
 	components ActiveMessageC;

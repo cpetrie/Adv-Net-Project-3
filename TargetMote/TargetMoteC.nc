@@ -1,7 +1,7 @@
 #include "printf.h"
 #include "MsgProgram3.h"
 
-module RadioC
+module TargetMoteC
 {
 	uses {
 		interface Boot;
