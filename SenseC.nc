@@ -62,8 +62,15 @@ enum {
 #define NODE_DECISION_DELAY 1000
 #define NODE_DECISION_START_DELAY 500
 
-// light threshold
-#define LIGHT_THRES 50
+#define DEFAULT_FREQ_CHANNEL 26
+
+void
+change_channel (uint8_t channel)
+{
+	call CC2420Config.setChannel (channel);
+	call RadioAMControl.stop();
+	call RadioAMControl.start();
+}
 
 module SenseC
 {
@@ -107,6 +114,7 @@ implementation
 			if (MY_MOTE_ID == MASTER_MOTE){
 				call RssiTimer.startPeriodicAt(NODE_DECISION_START_DELAY, NODE_DECISION_DELAY);
 			}
+			change_channel (DEFAULT_FREQ_CHANNEL);
 		}
 		else {
 			call RadioAMControl.start();
