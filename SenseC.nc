@@ -68,6 +68,7 @@ implementation
 	int8_t signalStrength = 0;
 
 	event void Boot.booted() {
+		call CC2420Config.setChannel (DEFAULT_FREQ_CHANNEL);
 		call RadioAMControl.start();
 		connected = FALSE;
 		beaconperiods = 0;
@@ -80,16 +81,6 @@ implementation
 /* Configure Radio **************************************************************/
 	event void RadioAMControl.startDone(error_t err) {
 		if (err == SUCCESS) {
-			// start the RssiTimer only if the master mote
-			if (MY_MOTE_ID == MASTER_MOTE){
-			  // calling rssi Timer with one shot timer now
-			  // call RssiTimer.startPeriodicAt(NODE_DECISION_START_DELAY, NODE_DECISION_DELAY);
-			}
-
-			call CC2420Config.setChannel (DEFAULT_FREQ_CHANNEL);
-			call RadioAMControl.stop();
-			call RadioAMControl.start();
-
 			printf ("Started radio on channel %d\n",
 				call CC2420Config.getChannel ());
 			printfflush ();
