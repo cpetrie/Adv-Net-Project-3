@@ -77,6 +77,9 @@ module SenseC
 		interface Timer<TMilli> as LightSampleTimer;
 		interface Timer<TMilli> as RssiTimer;
 		interface Read<uint16_t>;
+
+		interface CC2420Config;
+		interface CC2420Packet;
 	}
 }
 implementation

@@ -48,19 +48,24 @@ configuration SenseAppC
 { } 
 implementation { 
   
-  components SenseC as App, MainC, LedsC, new HamamatsuS1087ParC() as Sensor;
-  components new TimerMilliC() as LightSampleTimer, new TimerMilliC() as RssiTimer;
-  components new AMSenderC(AM_RADIO_PACKET_MSG);
-  components new AMReceiverC(AM_RADIO_PACKET_MSG);
-  components ActiveMessageC;
+	components SenseC as App, MainC, LedsC, new HamamatsuS1087ParC() as Sensor;
+	components new TimerMilliC() as LightSampleTimer, new TimerMilliC() as RssiTimer;
+	components new AMSenderC(AM_RADIO_PACKET_MSG);
+	components new AMReceiverC(AM_RADIO_PACKET_MSG);
+	components ActiveMessageC;
 
-  App.Boot -> MainC.Boot;
-  App.Leds -> LedsC;
-  App.LightSampleTimer -> LightSampleTimer;
-  App.RssiTimer -> RssiTimer;
-  App.Read -> Sensor;
-  App.RadioReceive -> AMReceiverC;
-  App.RadioAMSend -> AMSenderC;
-  App.RadioAMControl -> ActiveMessageC;
-  App.RadioPacket -> AMSenderC;
+	components CC2420ControlC, CC2420PacketC;
+
+	App.Boot -> MainC.Boot;
+	App.Leds -> LedsC;
+	App.LightSampleTimer -> LightSampleTimer;
+	App.RssiTimer -> RssiTimer;
+	App.Read -> Sensor;
+	App.RadioReceive -> AMReceiverC;
+	App.RadioAMSend -> AMSenderC;
+	App.RadioAMControl -> ActiveMessageC;
+	App.RadioPacket -> AMSenderC;
+
+	App.CC2420Packet -> CC2420PacketC;
+	App.CC2420Control -> CC2420PacketC;
 }
