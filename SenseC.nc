@@ -205,6 +205,10 @@ implementation
 					call Leds.led1On();
 					call Leds.led0Off();
 				}
+
+				call CC2420Config.setChannel (DEFAULT_FREQ_CHANNEL);
+				call RadioAMControl.stop();
+				call RadioAMControl.start();
 			}
 		}
 		
