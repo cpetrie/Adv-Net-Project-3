@@ -19,8 +19,8 @@ enum {
 #define LIGHT_READ_DELAY 200
 
 // the delay between determining near/far nodes
-#define NODE_DECISION_DELAY 1000
-#define NODE_DECISION_START_DELAY 500
+#define NODE_DECISION_DELAY 100
+#define NODE_DECISION_START_DELAY 0
 
 #define DEFAULT_FREQ_CHANNEL 26
 #define GROUP4_CHANNEL_FREQ 14
@@ -79,7 +79,8 @@ implementation
 		if (err == SUCCESS) {
 			// start the RssiTimer only if the master mote
 			if (MY_MOTE_ID == MASTER_MOTE){
-				call RssiTimer.startPeriodicAt(NODE_DECISION_START_DELAY, NODE_DECISION_DELAY);
+			  // calling rssi Timer with one shot timer now
+			  // call RssiTimer.startPeriodicAt(NODE_DECISION_START_DELAY, NODE_DECISION_DELAY);
 			}
 
 			call CC2420Config.setChannel (DEFAULT_FREQ_CHANNEL);
@@ -204,7 +205,7 @@ implementation
 		// build message
 		message->msg_type = MASTER_POWER_REQUEST;
 		message->node_id = MASTER_MOTE;
-		message->data = 0;
+		message->data = signalStrength;
 		
 		// send out a mote value request message
 		if (!radioLocked) {
@@ -274,9 +275,6 @@ implementation
 	}
 
 	event message_t* TargetMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
-		radio_packet_msg_t* message = (radio_packet_msg_t*)payload;
-		radio_packet_msg_t* newMessage;
-
 		if (len != sizeof(TargetMsg)) {
 			return bufPtr;
 		} else {
@@ -291,9 +289,12 @@ implementation
 		  call RadioAMControl.stop();
 		  call RadioAMControl.start();
 
-		  // if master transmits some stuff
+		  // if master transmits a MASTER_POWER_REQUEST
+		  if (MY_MOTE_ID == MASTER_MOTE){
+		    call RssiTimer.startOneShotAt(NODE_DECISION_START_DELAY, NODE_DECISION_DELAY);
+		  }
 		}
-		  // else hang out		
+		// else return
 		return bufPtr;
 	}
 }
