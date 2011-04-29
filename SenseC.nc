@@ -312,6 +312,9 @@ implementation
 		  
 		  signalStrength = call CC2420Packet.getRssi( bufPtr);
 
+		  printf ("Mote %d got a target message with strength %d\n",
+			  MY_MOTE_ID, signalStrength);
+
 		  // change to personal frequency
 		  call CC2420Config.setChannel (GROUP4_CHANNEL_FREQ);
 		  call RadioAMControl.stop();
