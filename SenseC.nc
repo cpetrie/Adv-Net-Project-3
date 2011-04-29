@@ -66,8 +66,6 @@ enum {
 
 module SenseC
 {
-	provides command void change_channel (uint8_t channel);
-
 	uses {
 		interface Boot;
 		interface Leds;
@@ -114,7 +112,10 @@ implementation
 			if (MY_MOTE_ID == MASTER_MOTE){
 				call RssiTimer.startPeriodicAt(NODE_DECISION_START_DELAY, NODE_DECISION_DELAY);
 			}
-			call SenseC.change_channel (DEFAULT_FREQ_CHANNEL);
+
+			call RadioConfig.setChannel (DEFAULT_FREQ_CHANNEL);
+			call RadioAMControl.stop();
+			call RadioAMControl.start();
 		}
 		else {
 			call RadioAMControl.start();
