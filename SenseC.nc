@@ -66,6 +66,8 @@ enum {
 
 module SenseC
 {
+	provides command void change_channel (uint8_t channel);
+
 	uses {
 		interface Boot;
 		interface Leds;
