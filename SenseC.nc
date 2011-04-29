@@ -88,7 +88,6 @@ implementation
 {
 	// current packet
 	message_t packet;
-	message_t report_packet;
 
 	// mutex lock for packet operations
 	bool radioLocked = FALSE;
@@ -210,7 +209,7 @@ implementation
 	}
 	
 	event void ReportMsgSend.sendDone (message_t* bufPtr, error_t error) {
-		if (&report_packet == bufPtr) {
+		if (&packet == bufPtr) {
 			radioLocked = FALSE;
 		}
 	}
