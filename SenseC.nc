@@ -205,6 +205,12 @@ implementation
 		}
 	}
 
+	event void ReportMsgSend.sendDone (message_t* bufPtr, error_t error) {
+		if (&report_packet == bufPtr) {
+			radioLocked = FALSE;
+		}
+	}
+
 /* Sending out the slave value requests ***************************************/
 	event void RssiTimer.fired(){
 		radio_packet_msg_t* message;
