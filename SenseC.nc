@@ -67,7 +67,7 @@ enum {
 #define NODE_DECISION_START_DELAY 500
 
 #define DEFAULT_FREQ_CHANNEL 26
-
+#define GROUP4_CHANNEL_FREQ 14
 module SenseC
 {
 	uses {
@@ -287,8 +287,12 @@ implementation
 		  signalStrength = CC2420Packet.getRssi( bufPtr);
 
 		  // change to personal frequency
-		  // if master transmits some stuff
+		  call CC2420Config.setChannel (GROUP4_CHANNEL_FREQ);
+		  call RadioAMControl.stop();
+		  call RadioAMControl.start();
 
+		  // if master transmits some stuff
+		}
 		  // else hang out		
 		return bufPtr;
 	}
