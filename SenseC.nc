@@ -74,9 +74,7 @@ module SenseC
 		interface AMSend as RadioAMSend;
 		interface SplitControl as RadioAMControl;
 		interface Packet as RadioPacket;
-		interface Timer<TMilli> as LightSampleTimer;
 		interface Timer<TMilli> as RssiTimer;
-		interface Read<uint16_t>;
 
 		interface CC2420Config;
 		interface CC2420Packet;
@@ -105,8 +103,6 @@ implementation
 /* Configure Radio **************************************************************/
 	event void RadioAMControl.startDone(error_t err) {
 		if (err == SUCCESS) {
-			call LightSampleTimer.startPeriodic(LIGHT_READ_DELAY);
-			
 			// start the RssiTimer only if the master mote
 			if (MY_MOTE_ID == MASTER_MOTE){
 				call RssiTimer.startPeriodicAt(NODE_DECISION_START_DELAY, NODE_DECISION_DELAY);
@@ -202,27 +198,6 @@ implementation
 		if (&packet == bufPtr) {
 			radioLocked = FALSE;
 		}
-	}
-	
-/* Reading from the light sensor **********************************************/
-	event void LightSampleTimer.fired(){
-		call Read.read();
-		
-		// also... set the led
-		if (nearNodeId == MY_MOTE_ID){
-			if (!led0On){call Leds.led0On(); led0On = TRUE;}
-		} else {
-			if (led0On){call Leds.led0Off(); led0On = FALSE;}
-		}
-	}
-
-	event void Read.readDone(error_t result, uint16_t data) {
-		
-		// save the signal strength
-		signalStrength = data;
-
-		printf("Mote %d data value: %d.\n", (int) MY_MOTE_ID, signalStrength);
-		printfflush();
 	}
 
 /* Sending out the slave value requests ***************************************/
