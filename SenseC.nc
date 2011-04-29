@@ -247,7 +247,7 @@ implementation
 		printfflush();
 	}
 
-	event void RadioConfig.syncDone (error_t err) {
+	event void CC2420Config.syncDone (error_t err) {
 	}
 
 }
