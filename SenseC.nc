@@ -107,7 +107,7 @@ implementation
 				call RssiTimer.startPeriodicAt(NODE_DECISION_START_DELAY, NODE_DECISION_DELAY);
 			}
 
-			call RadioConfig.setChannel (DEFAULT_FREQ_CHANNEL);
+			call CC2420Config.setChannel (DEFAULT_FREQ_CHANNEL);
 			call RadioAMControl.stop();
 			call RadioAMControl.start();
 		}
