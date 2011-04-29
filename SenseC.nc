@@ -254,6 +254,7 @@ implementation
 				}
 			}
 		}
+		return bufPtr;
 	}
 
 	/* Receive Simple Beacon Message ***************************************************/
