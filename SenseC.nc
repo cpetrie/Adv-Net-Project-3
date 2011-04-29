@@ -10,7 +10,7 @@ enum {
 };
 
 // the mote number (either 0 or 1)
-#define MY_MOTE_ID SLAVE_MOTE
+#define MY_MOTE_ID MASTER_MOTE
 
 // our subnet ID
 #define SUBNET_ID 4
