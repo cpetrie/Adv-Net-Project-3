@@ -21,6 +21,7 @@ implementation
   
 	event void Boot.booted() {
 		call Leds.led0On();
+		call Leds.led1Off();
 		call RadioAMControl.start();
 		radioLocked = FALSE;
 	}
@@ -55,6 +56,9 @@ implementation
 	event void RadioAMSend.sendDone(message_t* bufPtr, error_t error) {
 		if (&packet == bufPtr) {
 			radioLocked = FALSE;
+			call Leds.led0Toggle();
+			call Leds.led1Toggle();
+
 		}
 	}
 
