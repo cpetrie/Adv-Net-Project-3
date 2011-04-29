@@ -236,10 +236,11 @@ implementation
 		if (!radioLocked) {
 			if (call RadioAMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(radio_packet_msg_t)) == SUCCESS) {
 				radioLocked = TRUE;
+				printf("Mote %d just sent out an Rssi request!\n", (int) MY_MOTE_ID);
 			}
 		}
 		
-		printf("Mote %d just sent out an Rssi request!\n", (int) MY_MOTE_ID);
+		printf ("Hopefully, the line above refers to sending an Rssi\n");
 		printfflush();
 	}
 
