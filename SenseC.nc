@@ -259,7 +259,6 @@ implementation
 	/* Receive Simple Beacon Message ***************************************************/
 	event message_t* SimpleBeaconMsgReceive.receive(message_t* bufPtr, void* payload, uint8_t len) {
 		BeaconMsg* message = (BeaconMsg*)payload;
-		ReportMsg* newMessage;
 		
 		beaconperiods = 0;
 
@@ -269,6 +268,8 @@ implementation
 			connected = TRUE;
 			call Leds.led2On();
 		}
+
+		return bufPtr;
 	}
 
 	event void CC2420Config.syncDone (error_t err) {
