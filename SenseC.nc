@@ -337,7 +337,7 @@ implementation
 
 		  // Start timeout to switch back to broadcast channel if
 		  // subnet takes too long
-		  call SubnetTimeoutTimer.startOneShotAt (0, SUBNET_TIMEOUT);
+		  call SubnetTimeoutTimer.startOneShot (SUBNET_TIMEOUT);
 		}
 		// else return
 		return bufPtr;
