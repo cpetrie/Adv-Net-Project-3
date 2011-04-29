@@ -1,0 +1,6 @@
+COMPONENT=TargetMoteAppC
+C2420_CHANNEL=26
+CFlags = -DCC2420_DEF_RFPower=3
+CFLAGS += -I$(TOSDIR)/lib/printf
+
+include $(MAKERULES)
