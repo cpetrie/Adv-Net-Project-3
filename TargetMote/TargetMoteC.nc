@@ -51,7 +51,7 @@ implementation
 				radioLocked = TRUE;
 			}
 		}
-		printf ("Sending on channel %d\n", call CC2420Config.getChannel());
+		printf ("Sending on channel %d\n", call RadioConfig.getChannel());
 	}
 
 	event void RadioAMSend.sendDone(message_t* bufPtr, error_t error) {
