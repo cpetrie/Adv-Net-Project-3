@@ -71,6 +71,7 @@ module SenseC
 		interface Leds;
 		interface Receive as RadioReceive;
 		interface AMSend as RadioAMSend;
+		interface AMSend as ReportMsgSend;
 		interface SplitControl as RadioAMControl;
 		interface Packet as RadioPacket;
 		interface Timer<TMilli> as RssiTimer;
