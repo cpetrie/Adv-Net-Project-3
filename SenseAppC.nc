@@ -50,8 +50,12 @@ implementation {
   
 	components SenseC as App, MainC, LedsC;
 	components new TimerMilliC() as RssiTimer;
-	components new AMSenderC(AM_RADIO_PACKET_MSG);
-	components new AMReceiverC(AM_RADIO_PACKET_MSG);
+	components new AMSenderC(AM_RADIO_PACKET_MSG) as RadioPacketSender;
+	components new AMReceiverC(AM_RADIO_PACKET_MSG) as RadioPacketReceiver;
+	components new AMSenderC(REP) as ReportMsgSender;
+	components new AMReceiverC(BCAST) as BeaconMsgReceiver;
+	components new AMReceiverC(REQ) as RequestMsgReceiver;
+	components new AMReceiverC(TMSG) as TargetMsgReceiver;
 	components ActiveMessageC;
 
 	components CC2420ControlC, CC2420PacketC;
@@ -59,10 +63,17 @@ implementation {
 	App.Boot -> MainC.Boot;
 	App.Leds -> LedsC;
 	App.RssiTimer -> RssiTimer;
-	App.RadioReceive -> AMReceiverC;
-	App.RadioAMSend -> AMSenderC;
+
+	App.RadioReceive -> RadioPacketReceiver;
+	App.RadioAMSend -> RadioPacketSender;
+	App.RadioPacket -> RadioPacketSender;
+
+	App.ReportMsgSend -> ReportMsgSender;
+	App.BeaconMsgReceive -> BeaconMsgReceiver;
+	App.RequestMsgReceive -> RequestMsgReceiver;
+	App.TargetMsgReceive -> TargetMsgReceiver;
+
 	App.RadioAMControl -> ActiveMessageC;
-	App.RadioPacket -> AMSenderC;
 
 	App.CC2420Packet -> CC2420PacketC;
 	App.CC2420Config -> CC2420ControlC.CC2420Config;
