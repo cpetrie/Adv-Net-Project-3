@@ -194,6 +194,8 @@ implementation
 
 			radioLocked = FALSE;
 
+			printf("Mote %d just finished sending out an Rssi request!\n", (int) MY_MOTE_ID);
+
 			if (MY_MOTE_ID == MASTER_MOTE
 			    && message->msg_type == NEAR_ID) {
 
@@ -277,15 +279,15 @@ implementation
 					newMessage = (ReportMsg*)call ReportMsgPacket.getPayload(&packet, sizeof(ReportMsg));
 					if (newMessage == NULL) {return bufPtr;}	
 	
-						// build message
-						newMessage->msgtype = REP;
-						newMessage->nodeid = nearNodeId;
+					// build message
+					newMessage->msgtype = REP;
+					newMessage->nodeid = nearNodeId;
 				
-						if (!radioLocked) {
-							if (call ReportMsgSend.send(REP, &packet, sizeof(ReportMsg)) == SUCCESS) {
-								radioLocked = TRUE;
-							}
+					if (!radioLocked) {
+						if (call ReportMsgSend.send(REP, &packet, sizeof(ReportMsg)) == SUCCESS) {
+							radioLocked = TRUE;
 						}
+					}
 				}
 			}
 		}
@@ -317,27 +319,27 @@ implementation
 		} else {
 		
 		  
-		  // save rssi
+			// save rssi
 		  
-		  signalStrength = call CC2420Packet.getRssi( bufPtr);
+			signalStrength = call CC2420Packet.getRssi( bufPtr);
 
-		  printf ("Mote %d got a target message with strength %d\n",
-			  MY_MOTE_ID, signalStrength);
-		  printfflush ();
+			printf ("Mote %d got a target message with strength %d\n",
+				MY_MOTE_ID, signalStrength);
+			printfflush ();
 
-		  // change to personal frequency
-		  call CC2420Config.setChannel (GROUP4_CHANNEL_FREQ);
-		  call RadioAMControl.stop();
-		  call RadioAMControl.start();
+			// change to personal frequency
+			call CC2420Config.setChannel (GROUP4_CHANNEL_FREQ);
+			call RadioAMControl.stop();
+			call RadioAMControl.start();
 
-		  // if master transmits a MASTER_POWER_REQUEST
-		  if (MY_MOTE_ID == MASTER_MOTE){
-		    call RssiTimer.startOneShotAt(NODE_DECISION_START_DELAY, NODE_DECISION_DELAY);
-		  }
+			// if master transmits a MASTER_POWER_REQUEST
+			if (MY_MOTE_ID == MASTER_MOTE){
+				call RssiTimer.startOneShotAt(NODE_DECISION_START_DELAY, NODE_DECISION_DELAY);
+			}
 
-		  // Start timeout to switch back to broadcast channel if
-		  // subnet takes too long
-		  call SubnetTimeoutTimer.startOneShot (SUBNET_TIMEOUT);
+			// Start timeout to switch back to broadcast channel if
+			// subnet takes too long
+			call SubnetTimeoutTimer.startOneShot (SUBNET_TIMEOUT);
 		}
 		// else return
 		return bufPtr;
