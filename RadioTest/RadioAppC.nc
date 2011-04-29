@@ -56,7 +56,8 @@ implementation {
 	components new AMReceiverC(AM_RADIO_PACKET_MSG);
 	components ActiveMessageC;
 	components CC2420ControlC as RadioConfig;
-  
+	components LocalTime, new CounterToLocalTimeC(TMilli) as LocalCounter;
+
 	App.Boot -> MainC.Boot;
 	App.Leds -> LedsC;
 	App.ButtonGet -> UserButtonC.Get;
@@ -70,4 +71,7 @@ implementation {
 	App.RadioPacket -> AMSenderC;
 
 	App.RadioConfig -> RadioConfig.CC2420Config;
+
+	LocalCounter.Counter -> LocalTime;
+	App.LocalTime -> LocalTimeC;
 }

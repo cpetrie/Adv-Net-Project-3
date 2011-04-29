@@ -46,7 +46,7 @@
 #include "RadioPacket.h"
 #include "printf.h"
 
-#define RECEIVER 1
+#define RECEIVER 0
 #define SENDER (!RECEIVER)
 
 #define DELAY() (512 * (1 + RECEIVER))
@@ -66,6 +66,8 @@ module RadioC
 
 		interface CC2420Config as RadioConfig;
 //	interface Init as RadioConfigInit;
+
+		interface LocalTime<uint32_t> as LocalTime;
 	}
 }
 implementation
@@ -87,6 +89,8 @@ implementation
 	event void ButtonNotify.notify (button_state_t val) {
 		
 		if (val == BUTTON_RELEASED) {
+			uint32_t start;
+
 			channel++;
 			if (channel > 26) {
 				channel = 11;
@@ -96,9 +100,13 @@ implementation
 			} else {
 				call Leds.led2Off();
 			}
+			start = call LocalTime.get();
 			call RadioConfig.setChannel (channel);
-			printf ("%s changed channel to %d\n", RECEIVER ? "RECEIVER" : "SENDER",
-				call RadioConfig.getChannel());
+			call RadioAMControl.stop();
+			call RadioAMControl.start();
+			printf ("%s changed channel to %d (took %u milliseconds)\n",
+				RECEIVER ? "RECEIVER" : "SENDER",
+				call RadioConfig.getChannel(), call LocalTime.get() - start);
 			printfflush ();
 		}
 	}
