@@ -89,6 +89,9 @@ implementation
 			call CC2420Config.setChannel (DEFAULT_FREQ_CHANNEL);
 			call RadioAMControl.stop();
 			call RadioAMControl.start();
+
+			printf ("Started radio on channel %d\n",
+				call CC2420Config.getChannel ());
 		}
 		else {
 			call RadioAMControl.start();
@@ -314,6 +317,7 @@ implementation
 
 		  printf ("Mote %d got a target message with strength %d\n",
 			  MY_MOTE_ID, signalStrength);
+		  printfflush ();
 
 		  // change to personal frequency
 		  call CC2420Config.setChannel (GROUP4_CHANNEL_FREQ);
