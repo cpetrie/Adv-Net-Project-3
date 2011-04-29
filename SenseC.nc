@@ -5,8 +5,8 @@
 
 // enumeration of mote IDs
 enum {
-	MASTER_MOTE = 0,
-	SLAVE_MOTE = 1
+	MASTER_MOTE = 41,
+	SLAVE_MOTE = 42
 };
 
 // the mote number (either 0 or 1)
