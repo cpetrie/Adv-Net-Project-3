@@ -55,7 +55,6 @@ implementation {
 	components new AMReceiverC(AM_RADIO_PACKET_MSG) as RadioPacketReceiver;
 	components new AMSenderC(REP) as ReportMsgSender;
 	components new AMReceiverC(BCAST) as BeaconMsgReceiver;
-	components new AMReceiverC(REQ) as RequestMsgReceiver;
 	components new AMReceiverC(TMSG) as TargetMsgReceiver;
 	components ActiveMessageC;
 
@@ -71,7 +70,6 @@ implementation {
 
 	App.ReportMsgSend -> ReportMsgSender;
 	App.BeaconMsgReceive -> BeaconMsgReceiver;
-	App.RequestMsgReceive -> RequestMsgReceiver;
 	App.TargetMsgReceive -> TargetMsgReceiver;
 
 	App.RadioAMControl -> ActiveMessageC;
