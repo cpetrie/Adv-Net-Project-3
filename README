@@ -1,0 +1,62 @@
+Project 3
+Group 4
+
+Brendan McLoughlin
+Chris Petrie
+Eric Willison
+
+BUILDING: 
+
+To compile the mote define MY_MOTE_ID to be MASTER_MOTE or SLAVE_MOTE
+in SenseC.ns. 
+
+In the project directory run make telosb to build the project.
+
+> make telosb
+
+
+Use Case:
+
+Target Mote: 
+
+Our motes listen for a target mote broadcasting on the channel 26 When
+the master mote hears the sinal it waits 100ms then broadcast a power
+request to the slave mote. Meanwile the when the slave mote hears a
+message from the target mote it will change its radio to channel 14
+and wait for the master's power request. After receiving the request
+it ransmits a message containing the rssi from the targent mote's
+message. The master mote will then decide who is the near mode (the
+mote with the highest rssi reading form the target mote's transmition)
+and broad cast this message before switching its radio back to the
+boradcast channel of 26. The slave mote will listen for this message
+and then switch its radio back to channel 26.
+
+If at any mote stay on channel 14 for more then the SUBNET_TIMEOUT
+then it will automatically switch back to channel 26 and wait for a
+new target message.
+
+
+Base Station: 
+
+All motes will be listening for the base station's messages. Only the
+master mote will transmit messages to the base station.  When ever the
+near mote switches locations or the base station request a report a
+ReportMsg will be broadcasted on the channel. The report message will
+state which mote (via mote id) is now the near mote.
+
+
+Light: 
+
+When in contact with the base station a mote will light the
+blue light. After communication periods with no contact form the base
+station the blue light will turn off.
+
+When a mote has been designated the near mote by the read node it will turn on its red lightand turn off the green light if it is on. 
+
+When a mote has been designated the far mote by the read node it will turn on its green light and turn off the red light if it is on. 
+
+
+
+Known Bugs:
+There are no known bugs in this implementation of project 3. 
+
