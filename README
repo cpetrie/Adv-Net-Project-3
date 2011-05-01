@@ -56,7 +56,13 @@ When a mote has been designated the near mote by the read node it will turn on i
 When a mote has been designated the far mote by the read node it will turn on its green light and turn off the red light if it is on. 
 
 
+Division of Labor:
+
+
+Brendan wrote the documentation, functions for recieveing the target message and initiation the inter network communication. 
+
 
 Known Bugs:
 There are no known bugs in this implementation of project 3. 
+
 
