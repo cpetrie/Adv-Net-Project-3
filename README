@@ -71,6 +71,13 @@ Brendan McLoughlin:
 
 Brendan wrote the documentation, functions for recieveing the target message and initiation the inter network communication. 
 
+Eric Willisson:
+* Worked out how to make channel-switching work (with collaboration
+with TA)
+* Tested signal strength and channel-switching subsystems -- layers
+using Brendan's work
+* Helped finalize and debug the combined project
+
 
 Known Bugs:
 There are no known bugs in this implementation of project 3. 
