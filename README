@@ -58,6 +58,16 @@ When a mote has been designated the far mote by the read node it will turn on it
 
 Division of Labor:
 
+Chris Petrie:
+* Adapted previous program's base code to fit final project; initial project import.
+* Implemented subnet inter-node communication, allowing for the nodes to determine which is the near and far node (initially simulated with the light sensors).
+* Implemented initial version of beacon-response receiving code.
+* Helped finalize and debug the combined project.
+
+Brendan McLoughlin: 
+
+* Implemented the functions for receiving messages from the target node and iitiating the inter-node communication process
+* Documentation and Readme
 
 Brendan wrote the documentation, functions for recieveing the target message and initiation the inter network communication. 
 
